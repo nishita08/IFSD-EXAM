@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Team-Player Database</title>
+  <script src="https://unpkg.com/react/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+
+    class Player {
+      constructor(name, scores) {
+        this.name = name;
+        this.scores = scores;
+      }
+    }
+
+    class TeamPlayerDatabase extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          players: []
+        };
+      }
+
+      createPlayer = () => {
+        const name = prompt("Enter player name:");
+        const scores = prompt("Enter scores (comma-separated):")
+          .split(",")
+          .map(Number);
+
+        const player = new Player(name, scores);
+        this.setState((prevState) => ({
+          players: [...prevState.players, player]
+        }));
+      };
+
+      updatePlayer = (index) => {
+        const { players } = this.state;
+        const name = prompt("Enter updated player name:");
+        const scores = prompt("Enter updated scores (comma-separated):")
+          .split(",")
+          .map(Number);
+
+        const updatedPlayer = { ...players[index], name, scores };
+        players.splice(index, 1, updatedPlayer);
+        this.setState({ players: [...players] });
+      };
+
+      deletePlayer = (index) => {
+        const { players } = this.state;
+        players.splice(index, 1);
+        this.setState({ players: [...players] });
+      };
+
+      calculatePlayerStats = (player) => {
+        const average = player.scores.reduce((total, score) => total + score, 0) / player.scores.length;
+        const minimum = Math.min(...player.scores);
+        const maximum = Math.max(...player.scores);
+        return { average, minimum, maximum };
+      };
+
+      displayPlayerStats = (player, index) => {
+        console.log(`Player at index ${index}: ${player.name}`);
+        console.log("Scores:", player.scores);
+        const stats = this.calculatePlayerStats(player);
+        console.log("Average Score:", stats.average);
+        console.log("Minimum Score:", stats.minimum);
+        console.log("Maximum Score:", stats.maximum);
+        console.log("--------------------");
+      };
+
+      handleMenuSelection = (choice) => {
+        switch (choice) {
+          case "1":
+            this.createPlayer();
+            break;
+          case "2":
+            this.state.players.forEach(this.displayPlayerStats);
+            break;
+          case "3":
+            this.updatePlayer(parseInt(prompt("Enter the index of the player to update:")));
+            break;
+          case "4":
+            this.deletePlayer(parseInt(prompt("Enter the index of the player to delete:")));
+            break;
+          case "5":
+            console.log("Exiting...");
+            break;
+          default:
+            console.log("Invalid choice. Try again.");
+        }
+      };
+
+      render() {
+        const { players } = this.state;
+
+        return (
+          <div>
+            <h2>Team-Player Database</h2>
+
+            <div>
+              <h3>Options:</h3>
+              <p>1. Create a player</p>
+              <p>2. Read all players</p>
+              <p>3. Update player scores</p>
+              <p>4. Delete a player</p>
+              <p>5. Exit</p>
+              <p>Enter your choice (1-5): <input type="text" id="menuChoice" /></p>
+              <button onClick={() => this.handleMenuSelection(document.getElementById("menuChoice").value)}>
+                Submit
+              </button>
+            </div>
+
+            <h3>All Players:</h3>
+            <ul>
+              {players.map((player, index) => (
+                <li key={index}>
+                  Player at index {index}: {player.name}
+                  <br />
+                  Scores: {player.scores.join(", ")}
+                  <br />
+                  Average: {this.calculatePlayerStats(player).average}
+                  <br />
+                  Minimum: {this.calculatePlayerStats(player).minimum}
+                  <br />
+                  Maximum: {this.calculatePlayerStats(player).maximum}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      }
+    }
+
+    ReactDOM.render(<TeamPlayerDatabase />, document.getElementById("root"));
+
+  </script>
+</body>
+
+</html>
